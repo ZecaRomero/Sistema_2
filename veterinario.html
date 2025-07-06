@@ -36,6 +36,11 @@
             const nome = document.getElementById('nome-vet').value.trim();
             if (nome) {
                 localStorage.setItem('vet_nome_temp', nome);
+                let vets = JSON.parse(localStorage.getItem('veterinarios') || '[]');
+                if (!vets.includes(nome)) {
+                    vets.push(nome);
+                    localStorage.setItem('veterinarios', JSON.stringify(vets));
+                }
                 window.location.href = document.referrer && document.referrer.includes('editar.html') ? 'editar.html' : 'index.html';
             }
         });

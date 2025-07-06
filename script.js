@@ -149,18 +149,26 @@ document.addEventListener("DOMContentLoaded", () => {
             if (animais.length > 0) {
                 const ultimo = animais[animais.length - 1];
                 ultimoAnimalEl.textContent = `${ultimo.serie} (${ultimo.rg})`;
-                // Exibir foto ao lado do card usando RG
+                // Exibir foto ao lado do card usando RG do último animal
                 const fotoPath = `fotos/${ultimo.rg}.jpg`;
-                fotoCardUltimo.src = fotoPath;
-                fotoCardUltimo.onload = function () {
-                    fotoCardUltimo.style.display = 'block';
+                fotoImg.src = fotoPath;
+                fotoImg.onload = function() {
+                    fotoContainer.style.display = 'block';
+                    fotoLabel.textContent = `Foto do animal RG: ${ultimo.rg}`;
+                    fotoErro.style.display = 'none';
                 };
-                fotoCardUltimo.onerror = function () {
-                    fotoCardUltimo.style.display = 'none';
+                fotoImg.onerror = function() {
+                    fotoContainer.style.display = 'block';
+                    fotoImg.src = '';
+                    fotoLabel.textContent = '';
+                    fotoErro.style.display = 'block';
                 };
             } else {
                 ultimoAnimalEl.textContent = '-';
-                fotoCardUltimo.style.display = 'none';
+                fotoContainer.style.display = 'none';
+                fotoImg.src = '';
+                fotoLabel.textContent = '';
+                fotoErro.style.display = 'none';
             }
         }
     }
@@ -218,10 +226,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 <input type="number" id="mov-peso-valor" step="0.01">
             </div>`;
         } else if (tipo === 'DG') {
+            // Carregar veterinários cadastrados
+            let vets = JSON.parse(localStorage.getItem('veterinarios') || '[]');
+            let options = vets.map(v => `<option value="${v}">${v}</option>`).join('');
             html = `<div class="mov-row">
                 <label for="mov-dg-data">Data*:</label>
                 <input type="date" id="mov-dg-data" required>
                 <label for="mov-dg-vet">Veterinário:</label>
+                <select id="mov-dg-vet-select" style="width:130px; margin-right:0.5rem;">
+                    <option value="">Escolha</option>
+                    ${options}
+                </select>
                 <input type="text" id="mov-dg-vet" placeholder="Nome do veterinário" style="width:120px;">
                 <a href="veterinario.html" class="button" style="padding:0.3rem 0.7rem; font-size:0.95rem; margin-left:0.5rem;">Adicionar Veterinário</a>
                 <label for="mov-dg-resultado">Resultado:</label>
@@ -305,6 +320,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 <label for="mov-outro-desc">Descrição:</label>
                 <input type="text" id="mov-outro-desc" placeholder="Detalhes/Observação">
             </div>`;
+        } else if (tipo === 'Brinco') {
+            html = `<div class="mov-row">
+                <label for="mov-brinco-data">Data*:</label>
+                <input type="date" id="mov-brinco-data" required>
+                <label for="mov-brinco-valor">Valor (R$)*:</label>
+                <input type="number" id="mov-brinco-valor" step="0.01" required>
+            </div>`;
         }
         movDinamicaEl.innerHTML = html;
         // Preencher veterinário se veio da página de cadastro
@@ -312,6 +334,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('mov-dg-vet').value = localStorage.getItem('vet_nome_temp');
             localStorage.removeItem('vet_nome_temp');
         }
+        // Ao escolher no select, preenche o campo texto
+        const vetSelect = document.getElementById('mov-dg-vet-select');
+        const vetInput = document.getElementById('mov-dg-vet');
+        vetSelect.addEventListener('change', function () {
+            vetInput.value = this.value;
+        });
     }
 
     tipoServicoEl.addEventListener('change', (e) => {
@@ -359,6 +387,16 @@ document.addEventListener("DOMContentLoaded", () => {
             movimentacao.origem = document.getElementById('mov-entrada-origem').value;
             movimentacao.data = document.getElementById('mov-entrada-data').value;
             movimentacao.fornecedor = document.getElementById('mov-entrada-fornecedor').value;
+        } else if (tipoServico === 'Brinco') {
+            movimentacao.data = document.getElementById('mov-brinco-data').value;
+            movimentacao.valor = document.getElementById('mov-brinco-valor').value;
+        }
+
+        // Cálculo do custo total
+        let custo = document.getElementById("custo").value || 0;
+        if (tipoServico === 'Brinco') {
+            const valorBrinco = parseFloat(document.getElementById('mov-brinco-valor').value) || 0;
+            custo = (parseFloat(custo) || 0) + valorBrinco;
         }
 
         const novoAnimal = {
@@ -366,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
             rg: validadores.rg.formatar(document.getElementById("rg").value),
             sexo: validadores.sexo.formatar(document.getElementById("sexo").value),
             raca: validadores.raca.formatar(document.getElementById("raca").value),
-            custo: document.getElementById("custo").value || 0,
+            custo: custo,
             venda: validadores.valorVenda.formatar(document.getElementById("valor-venda").value),
             nascimento: document.getElementById("nascimento").value,
             meses: document.getElementById("meses").value,
@@ -563,6 +601,11 @@ document.addEventListener("DOMContentLoaded", () => {
     rgInput.addEventListener('input', atualizarFotoAnimalPorRG);
     rgInput.addEventListener('blur', atualizarFotoAnimalPorRG);
     rgInput.addEventListener('change', atualizarFotoAnimalPorRG);
+
+    // Bloquear caracteres não permitidos em RG (apenas 6 números)
+    rgInput.addEventListener('input', function (e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+    });
 
     renderizarTabela();
 });

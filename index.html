@@ -10,7 +10,7 @@
 
 <body>
     <header>
-        <img src="img/logo.png" alt="Logo" style="max-height:64px; display:block; margin:0 auto 0.5rem auto;">
+        <img src="logo.png" alt="Logo" style="max-height:64px; display:block; margin:0 auto 0.5rem auto;">
         <h1>Gestão de Custo Individual de Bovinos</h1>
     </header>
 
@@ -25,8 +25,13 @@
                 <h3>Último Cadastrado</h3>
                 <div id="ultimo-animal">-</div>
             </div>
-            <img id="foto-card-ultimo" src="" alt="Foto do último animal"
-                style="display:none; width:280px; height:220px; object-fit:cover; border-radius:8px; border:1.5px solid #ccc;">
+            <div id="foto-animal-container" style="display:none; text-align:center;">
+                <img id="foto-animal" src="" alt="Foto do animal"
+                    style="max-width:180px; max-height:180px; border-radius:8px; border:1.5px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <div id="foto-animal-label" style="margin-top:0.5rem; color:#555; font-size:0.95rem;"></div>
+                <div id="foto-animal-erro" style="color:#d32f2f; font-size:0.95rem; margin-top:0.3rem; display:none;">
+                    Foto não encontrada para esta série.</div>
+            </div>
         </section>
 
         <section id="form-section">
@@ -40,7 +45,8 @@
                     </div>
                     <div class="form-row">
                         <label for="rg">RG:</label>
-                        <input type="text" id="rg" required>
+                        <input type="text" id="rg" required maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
+                            autocomplete="off">
                     </div>
                     <div class="form-row">
                         <label for="sexo">Sexo:</label>
@@ -80,16 +86,6 @@
                         <input type="number" id="valor-venda" step="0.01" readonly>
                     </div>
                 </div>
-                <!-- Área para exibir a foto do animal -->
-                <div id="foto-animal-container" style="display:none; text-align:center; margin-bottom:1rem;">
-                    <img id="foto-animal" src="" alt="Foto do animal"
-                        style="max-width:180px; max-height:180px; border-radius:8px; border:1.5px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div id="foto-animal-label" style="margin-top:0.5rem; color:#555; font-size:0.95rem;"></div>
-                    <div id="foto-animal-erro"
-                        style="color:#d32f2f; font-size:0.95rem; margin-top:0.3rem; display:none;">Foto não encontrada
-                        para esta série.</div>
-                </div>
-
                 <!-- Movimentação dinâmica -->
                 <div class="form-row">
                     <label for="tipo-servico">Tipo de Serviço:</label>
@@ -105,6 +101,7 @@
                         <option value="Transferencia">Transferência</option>
                         <option value="Cobricao">Cobrição</option>
                         <option value="Outro">Outro</option>
+                        <option value="Brinco">Brinco</option>
                     </select>
                 </div>
                 <div id="movimentacao-dinamica"></div>
