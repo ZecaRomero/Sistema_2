@@ -463,3 +463,32 @@ header img[alt="Logo"] {
     transform: scale(1.25);
     text-shadow: 2px 2px 8px rgba(0,121,107,0.15);
 }
+
+.loader {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 4px solid #e0e0e0;
+    border-top: 4px solid #00796b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+tbody tr:hover {
+    background: #f1f8e9;
+    transition: background 0.2s;
+}
+.linha-selecionada {
+    background: #e0f2f1 !important;
+    box-shadow: 0 2px 8px rgba(0,121,107,0.08);
+}
+#filtro-todos.active, #filtro-lucro.active, #filtro-prejuizo.active {
+    box-shadow: 0 2px 8px rgba(0,121,107,0.10);
+    border-width: 2px;
+    filter: brightness(1.08);
+}

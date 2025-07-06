@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     fotoContainer.style.display = 'block';
                     fotoImg.src = '';
                     fotoLabel.textContent = '';
-                    fotoErro.style.display = 'block';
+                    fotoErro.style.display = 'none';
                 };
             } else {
                 ultimoAnimalEl.textContent = '-';
@@ -194,13 +194,51 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Busca e filtros
+    const buscaInput = document.getElementById('busca-animais');
+    const filtroTodos = document.getElementById('filtro-todos');
+    const filtroLucro = document.getElementById('filtro-lucro');
+    const filtroPrejuizo = document.getElementById('filtro-prejuizo');
+    const resumoLista = document.getElementById('resumo-lista');
+    let filtroAtual = 'todos';
+    let buscaAtual = '';
+    let idxSelecionado = -1;
+
+    function atualizarResumoLista(animaisFiltrados) {
+        const total = animaisFiltrados.length;
+        const lucro = animaisFiltrados.filter(a => parseFloat(a.venda) - parseFloat(a.custo) >= 0).length;
+        const preju = animaisFiltrados.filter(a => parseFloat(a.venda) - parseFloat(a.custo) < 0).length;
+        const somaLucro = animaisFiltrados.reduce((s, a) => s + Math.max(0, parseFloat(a.venda) - parseFloat(a.custo)), 0);
+        const somaPreju = animaisFiltrados.reduce((s, a) => s + Math.min(0, parseFloat(a.venda) - parseFloat(a.custo)), 0);
+        resumoLista.innerHTML = `Total: <b>${total}</b> &nbsp;|&nbsp; Lucro: <b style='color:#388e3c;'>${lucro}</b> (R$ ${somaLucro.toFixed(2)}) &nbsp;|&nbsp; Prejuízo: <b style='color:#d32f2f;'>${preju}</b> (R$ ${somaPreju.toFixed(2)})`;
+    }
+
+    function getAnimaisFiltrados() {
+        let filtrados = animais;
+        if (buscaAtual) {
+            const termo = buscaAtual.toLowerCase();
+            filtrados = filtrados.filter(a =>
+                (a.serie && a.serie.toLowerCase().includes(termo)) ||
+                (a.rg && a.rg.toLowerCase().includes(termo)) ||
+                (a.raca && a.raca.toLowerCase().includes(termo))
+            );
+        }
+        if (filtroAtual === 'lucro') {
+            filtrados = filtrados.filter(a => parseFloat(a.venda) - parseFloat(a.custo) >= 0);
+        } else if (filtroAtual === 'prejuizo') {
+            filtrados = filtrados.filter(a => parseFloat(a.venda) - parseFloat(a.custo) < 0);
+        }
+        return filtrados;
+    }
+
     function renderizarTabela() {
         tabela.innerHTML = "";
-        animais.forEach((animal, index) => {
+        const animaisFiltrados = getAnimaisFiltrados();
+        atualizarResumoLista(animaisFiltrados);
+        animaisFiltrados.forEach((animal, index) => {
             const linha = document.createElement("tr");
             const lucroPrejuizo = parseFloat(animal.venda) - parseFloat(animal.custo);
             const classeLucro = lucroPrejuizo >= 0 ? 'lucro' : 'prejuizo';
-
             linha.innerHTML = `
                 <td>${animal.serie}</td>
                 <td>${animal.rg}</td>
@@ -208,25 +246,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${animal.raca}</td>
                 <td>R$ ${parseFloat(animal.custo).toFixed(2)}</td>
                 <td>R$ ${parseFloat(animal.venda).toFixed(2)}</td>
-                <td class="${classeLucro} lucro-prejuizo-cell" style="cursor:pointer;" data-index="${index}">R$ ${lucroPrejuizo.toFixed(2)}</td>
+                <td class="${classeLucro} lucro-prejuizo-cell" style="cursor:pointer;" data-index="${animais.indexOf(animal)}" title="Clique para ver o detalhamento">R$ ${lucroPrejuizo.toFixed(2)}</td>
                 <td class="actions">
-                    <button onclick="editarAnimal(${index})">Editar</button>
-                    <button onclick="excluirAnimal(${index})">Excluir</button>
+                    <button onclick="editarAnimal(${animais.indexOf(animal)})">Editar</button>
+                    <button onclick="excluirAnimal(${animais.indexOf(animal)})">Excluir</button>
                 </td>
             `;
+            if (idxSelecionado === animais.indexOf(animal)) linha.classList.add('linha-selecionada');
             tabela.appendChild(linha);
         });
-        // Sempre mostrar o último cadastrado ao atualizar a tabela
         animalSelecionadoIdx = animais.length > 0 ? animais.length - 1 : -1;
         renderizarResumo(animalSelecionadoIdx);
-
-        // Adicionar evento de clique para detalhar lucro/prejuízo
         document.querySelectorAll('.lucro-prejuizo-cell').forEach(cell => {
             cell.addEventListener('click', function () {
                 const idx = parseInt(this.getAttribute('data-index'));
                 const animal = animais[idx];
                 const lucroPrejuizo = parseFloat(animal.venda) - parseFloat(animal.custo);
-                abrirModalDetalhe(animal, lucroPrejuizo);
+                idxSelecionado = idx;
+                abrirModalDetalhe(animal, lucroPrejuizo, idx);
+                renderizarTabela();
             });
         });
     }
@@ -501,7 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 fotoContainer.style.display = 'block';
                 fotoImg.src = '';
                 fotoLabel.textContent = '';
-                fotoErro.style.display = 'block';
+                fotoErro.style.display = 'none';
             };
         } else {
             fotoContainer.style.display = 'none';
@@ -626,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 fotoContainer.style.display = 'block';
                 fotoImg.src = '';
                 fotoLabel.textContent = '';
-                fotoErro.style.display = 'block';
+                fotoErro.style.display = 'none';
             };
         } else {
             fotoContainer.style.display = 'none';
@@ -653,24 +691,97 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalTitulo = document.getElementById('modal-detalhe-titulo');
     const modalInfo = document.getElementById('modal-detalhe-info');
     const modalLucro = document.getElementById('modal-detalhe-lucro');
+    const modalIcone = document.getElementById('modal-detalhe-icone');
+    const modalExtra = document.getElementById('modal-detalhe-extra');
+    const modalAnterior = document.getElementById('modal-detalhe-anterior');
+    const modalProximo = document.getElementById('modal-detalhe-proximo');
 
-    function abrirModalDetalhe(animal, lucroPrejuizo) {
+    let idxModal = 0;
+    function abrirModalDetalhe(animal, lucroPrejuizo, idx) {
+        idxModal = idx;
+        // Ícone e borda
+        const cor = lucroPrejuizo >= 0 ? '#388e3c' : '#d32f2f';
+        const bg = lucroPrejuizo >= 0 ? '#e8f5e8' : '#ffebee';
+        const icone = lucroPrejuizo >= 0 ? '🟢' : '🔴';
+        modalIcone.innerHTML = icone;
+        modalContent.style.borderColor = bg;
         // Foto
         const fotoPath = `fotos/${animal.rg}.jpg`;
-        modalFoto.innerHTML = `<img src="${fotoPath}" alt="Foto do animal" style="max-width:120px; max-height:90px; border-radius:8px; border:1.5px solid #ccc; margin-bottom:0.3rem;">`;
+        modalFoto.innerHTML = `<img id="modal-foto-img" src="${fotoPath}" alt="Foto do animal" style="max-width:120px; max-height:90px; border-radius:8px; border:1.5px solid #ccc; margin-bottom:0.3rem;">`;
+        const fotoImg = document.getElementById('modal-foto-img');
+        fotoImg.onerror = function () {
+            modalFoto.innerHTML = `<div id='modal-foto-loading' style='color:#bbb; font-size:2.2rem; margin-bottom:0.2rem;'><span class='loader'></span></div>`;
+            setTimeout(() => {
+                modalFoto.innerHTML = `<div style='color:#bbb; font-size:2.2rem; margin-bottom:0.2rem;'>📷</div><div style='font-size:1.05rem; color:#d32f2f; font-weight:600; margin-top:0.2rem;'>Foto não disponível para este animal</div>`;
+            }, 1000);
+        };
         // Título
         modalTitulo.textContent = `${animal.serie} (${animal.rg})`;
         // Info
         modalInfo.innerHTML = `Sexo: <b>${animal.sexo}</b> &nbsp;|&nbsp; Raça: <b>${animal.raca}</b><br>Custo: <b>R$ ${parseFloat(animal.custo).toFixed(2)}</b> &nbsp;|&nbsp; Venda: <b>R$ ${parseFloat(animal.venda).toFixed(2)}</b>`;
+        // Extra
+        let extra = '';
+        if (animal.nascimento) extra += `Nascimento: <b>${animal.nascimento}</b> &nbsp;|&nbsp;`;
+        if (animal.meses) extra += `Meses: <b>${animal.meses}</b> &nbsp;|&nbsp;`;
+        if (animal.movimentacao && animal.movimentacao.tipo) extra += `Tipo de Serviço: <b>${animal.movimentacao.tipo}</b>`;
+        modalExtra.innerHTML = extra;
         // Lucro/prejuízo
-        const cor = lucroPrejuizo >= 0 ? '#388e3c' : '#d32f2f';
-        const bg = lucroPrejuizo >= 0 ? '#e8f5e8' : '#ffebee';
-        const icone = lucroPrejuizo >= 0 ? '✔️' : '⚠️';
-        modalLucro.innerHTML = `<span style="color:${cor}; background:${bg}; padding:0.3rem 0.7rem; border-radius:6px;">${icone} ${lucroPrejuizo >= 0 ? 'Lucro' : 'Prejuízo'}: R$ ${lucroPrejuizo.toFixed(2)}</span>`;
+        modalLucro.innerHTML = `<span style="color:${cor}; background:${bg}; padding:0.3rem 0.7rem; border-radius:6px;">${lucroPrejuizo >= 0 ? '✔️ Lucro' : '⚠️ Prejuízo'}: R$ ${lucroPrejuizo.toFixed(2)}</span>`;
         modal.style.display = 'flex';
+        setTimeout(() => { modal.style.opacity = 1; }, 10);
+        // Habilitar/desabilitar setas
+        modalAnterior.disabled = (idx <= 0);
+        modalProximo.disabled = (idx >= animais.length - 1);
+        // Tooltip no ícone
+        modalIcone.title = `Cálculo: Venda (${parseFloat(animal.venda).toFixed(2)}) - Custo (${parseFloat(animal.custo).toFixed(2)}) = ${lucroPrejuizo.toFixed(2)}`;
     }
-    modalFechar.onclick = () => { modal.style.display = 'none'; };
-    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+    modalFechar.onclick = () => { modal.style.opacity = 0; setTimeout(() => { modal.style.display = 'none'; }, 250); };
+    modal.onclick = (e) => { if (e.target === modal) { modal.style.opacity = 0; setTimeout(() => { modal.style.display = 'none'; }, 250); } };
+    modalAnterior.onclick = () => {
+        if (idxModal > 0) {
+            const animal = animais[idxModal - 1];
+            const lucroPrejuizo = parseFloat(animal.venda) - parseFloat(animal.custo);
+            abrirModalDetalhe(animal, lucroPrejuizo, idxModal - 1);
+        }
+    };
+    modalProximo.onclick = () => {
+        if (idxModal < animais.length - 1) {
+            const animal = animais[idxModal + 1];
+            const lucroPrejuizo = parseFloat(animal.venda) - parseFloat(animal.custo);
+            abrirModalDetalhe(animal, lucroPrejuizo, idxModal + 1);
+        }
+    };
+    document.addEventListener('keydown', function (e) {
+        if (modal.style.display === 'flex' && (e.key === 'Escape' || e.key === 'Esc')) {
+            modal.style.opacity = 0; setTimeout(() => { modal.style.display = 'none'; }, 250);
+        }
+    });
+
+    buscaInput.addEventListener('input', function () {
+        buscaAtual = this.value;
+        renderizarTabela();
+    });
+    filtroTodos.addEventListener('click', function () {
+        filtroAtual = 'todos';
+        filtroTodos.classList.add('active');
+        filtroLucro.classList.remove('active');
+        filtroPrejuizo.classList.remove('active');
+        renderizarTabela();
+    });
+    filtroLucro.addEventListener('click', function () {
+        filtroAtual = 'lucro';
+        filtroTodos.classList.remove('active');
+        filtroLucro.classList.add('active');
+        filtroPrejuizo.classList.remove('active');
+        renderizarTabela();
+    });
+    filtroPrejuizo.addEventListener('click', function () {
+        filtroAtual = 'prejuizo';
+        filtroTodos.classList.remove('active');
+        filtroLucro.classList.remove('active');
+        filtroPrejuizo.classList.add('active');
+        renderizarTabela();
+    });
 
     renderizarTabela();
 });
