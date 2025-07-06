@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Custo Bovino</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Gestão de Custo Individual de Bovinos</h1>
+    </header>
+
+    <main>
+        <!-- Cards de Resumo -->
+        <section id="resumo-section">
+            <div class="card-resumo">
+                <h3>Animais Cadastrados</h3>
+                <div id="total-animais">0</div>
+            </div>
+            <div class="card-resumo">
+                <h3>Último Cadastrado</h3>
+                <div id="ultimo-animal">-</div>
+            </div>
+        </section>
+
+        <section id="form-section">
+            <h2>Cadastro de Animal</h2>
+            <form id="animal-form">
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="serie">Série:</label>
+                        <input type="text" id="serie" required pattern="[A-Za-z]+" inputmode="text" autocomplete="off">
+                    </div>
+                    <div class="form-row">
+                        <label for="rg">RG:</label>
+                        <input type="text" id="rg" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="sexo">Sexo:</label>
+                        <select id="sexo" required>
+                            <option value="">Selecione</option>
+                            <option value="Fêmea">Fêmea</option>
+                            <option value="Macho">Macho</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="raca">Raça:</label>
+                        <select id="raca">
+                            <option value="">Selecione</option>
+                            <option value="Nelore">Nelore</option>
+                            <option value="Brahman">Brahman</option>
+                            <option value="Gir">Gir</option>
+                            <option value="Receptoras">Receptoras</option>
+                            <option value="Cruza">Cruza</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="nascimento">Nascimento:</label>
+                        <input type="date" id="nascimento">
+                    </div>
+                    <div class="form-row">
+                        <label for="meses">Meses:</label>
+                        <input type="number" id="meses" min="0" placeholder="0" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+                </div>
+                <div class="form-row-group-consulta">
+                    <div class="form-row">
+                        <label for="custo">Custo Total (R$):</label>
+                        <input type="number" id="custo" step="0.01" placeholder="0.00" readonly>
+                    </div>
+                    <div class="form-row">
+                        <label for="valor-venda">Valor de Venda (R$):</label>
+                        <input type="number" id="valor-venda" step="0.01" readonly>
+                    </div>
+                </div>
+                <!-- Área para exibir a foto do animal -->
+                <div id="foto-animal-container" style="display:none; text-align:center; margin-bottom:1rem;">
+                    <img id="foto-animal" src="" alt="Foto do animal"
+                        style="max-width:180px; max-height:180px; border-radius:8px; border:1.5px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                    <div id="foto-animal-label" style="margin-top:0.5rem; color:#555; font-size:0.95rem;"></div>
+                </div>
+
+                <!-- Movimentação dinâmica -->
+                <div class="form-row">
+                    <label for="tipo-servico">Tipo de Serviço:</label>
+                    <select id="tipo-servico" required>
+                        <option value="">Selecione</option>
+                        <option value="Peso">Peso</option>
+                        <option value="DG">Diagnóstico de Gestação</option>
+                        <option value="Exame">Exame</option>
+                        <option value="Saida">Saída</option>
+                        <option value="Entrada">Entrada</option>
+                    </select>
+                </div>
+                <div id="movimentacao-dinamica"></div>
+
+                <div class="form-actions">
+                    <button type="submit">Salvar</button>
+                    <button type="reset">Limpar</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="list-section">
+            <h2>Lista de Animais</h2>
+            <div style="margin-bottom:1rem; display:flex; gap:1rem;">
+                <input type="file" id="importar-excel" accept=".xlsx,.csv" style="display:none;">
+                <button type="button" id="btn-importar">Importar Excel</button>
+                <button type="button" id="btn-exportar">Exportar Dados</button>
+            </div>
+            <table id="animal-table">
+                <thead>
+                    <tr>
+                        <th>Série</th>
+                        <th>RG</th>
+                        <th>Sexo</th>
+                        <th>Raça</th>
+                        <th>Custo</th>
+                        <th>Venda</th>
+                        <th>Lucro/Prejuízo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 - Sistema de Gestão de Rebanho</p>
+    </footer>
+
+    <!-- SheetJS para importação/exportação Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
