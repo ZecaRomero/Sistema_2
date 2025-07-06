@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Elementos dos cards de resumo
     const totalAnimaisEl = document.getElementById("total-animais");
     const ultimoAnimalEl = document.getElementById("ultimo-animal");
+    const fotoCardUltimo = document.getElementById('foto-card-ultimo');
 
     // Funções de validação e formatação por domínio
     const validadores = {
@@ -129,9 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Bloquear caracteres não permitidos em série (apenas letras)
+    // Bloquear caracteres não permitidos em série (apenas letras e números)
     document.getElementById('serie').addEventListener('input', function (e) {
-        this.value = this.value.replace(/[^A-Za-z]/g, '');
+        this.value = this.value.replace(/[^A-Za-z0-9]/g, '');
     });
     // Bloquear caracteres não permitidos em meses (apenas números inteiros positivos)
     document.getElementById('meses').addEventListener('input', function (e) {
@@ -148,8 +149,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (animais.length > 0) {
                 const ultimo = animais[animais.length - 1];
                 ultimoAnimalEl.textContent = `${ultimo.serie} (${ultimo.rg})`;
+                // Exibir foto ao lado do card usando RG
+                const fotoPath = `fotos/${ultimo.rg}.jpg`;
+                fotoCardUltimo.src = fotoPath;
+                fotoCardUltimo.onload = function () {
+                    fotoCardUltimo.style.display = 'block';
+                };
+                fotoCardUltimo.onerror = function () {
+                    fotoCardUltimo.style.display = 'none';
+                };
             } else {
                 ultimoAnimalEl.textContent = '-';
+                fotoCardUltimo.style.display = 'none';
             }
         }
     }
@@ -180,34 +191,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.editarAnimal = function (index) {
-        const animal = animais[index];
-        document.getElementById("serie").value = animal.serie;
-        document.getElementById("rg").value = animal.rg;
-        document.getElementById("sexo").value = animal.sexo;
-        document.getElementById("raca").value = animal.raca;
-        document.getElementById("custo").value = animal.custo;
-        document.getElementById("valor-venda").value = animal.venda;
-        document.getElementById("nascimento").value = animal.nascimento || '';
-        document.getElementById("meses").value = animal.meses || '';
-
-        // Movimentação
-        document.querySelector('.mov-peso-data').value = animal.movimentacao?.peso?.data || '';
-        document.querySelector('.mov-peso-valor').value = animal.movimentacao?.peso?.valor || '';
-        document.querySelector('.mov-dg-data').value = animal.movimentacao?.dg?.data || '';
-        document.querySelector('.mov-dg-resultado').value = animal.movimentacao?.dg?.resultado || '';
-        document.querySelector('.mov-exame-data').value = animal.movimentacao?.exame?.data || '';
-        document.querySelector('.mov-exame-valor').value = animal.movimentacao?.exame?.valor || '';
-
-        // Aplicar validações
-        aplicarValidacao('serie', 'serie');
-        aplicarValidacao('rg', 'rg');
-        aplicarValidacao('sexo', 'sexo');
-        aplicarValidacao('raca', 'raca');
-        aplicarValidacao('valor-venda', 'valorVenda');
-
-        animais.splice(index, 1);
-        salvarNoStorage();
-        renderizarTabela();
+        // Redireciona para página de edição
+        localStorage.setItem('editar_idx', index);
+        window.location.href = 'editar.html';
     }
 
     window.excluirAnimal = function (index) {
@@ -226,24 +212,25 @@ document.addEventListener("DOMContentLoaded", () => {
         let html = '';
         if (tipo === 'Peso') {
             html = `<div class="mov-row">
-                <label for="mov-peso-data">Data:</label>
-                <input type="date" id="mov-peso-data">
+                <label for="mov-peso-data">Data*:</label>
+                <input type="date" id="mov-peso-data" required>
                 <label for="mov-peso-valor">Peso (kg):</label>
                 <input type="number" id="mov-peso-valor" step="0.01">
             </div>`;
         } else if (tipo === 'DG') {
             html = `<div class="mov-row">
-                <label for="mov-dg-data">Data:</label>
-                <input type="date" id="mov-dg-data">
+                <label for="mov-dg-data">Data*:</label>
+                <input type="date" id="mov-dg-data" required>
                 <label for="mov-dg-vet">Veterinário:</label>
-                <input type="text" id="mov-dg-vet" placeholder="Nome do veterinário">
+                <input type="text" id="mov-dg-vet" placeholder="Nome do veterinário" style="width:120px;">
+                <a href="veterinario.html" class="button" style="padding:0.3rem 0.7rem; font-size:0.95rem; margin-left:0.5rem;">Adicionar Veterinário</a>
                 <label for="mov-dg-resultado">Resultado:</label>
                 <input type="text" id="mov-dg-resultado" placeholder="Resultado">
             </div>`;
         } else if (tipo === 'Exame') {
             html = `<div class="mov-row">
-                <label for="mov-exame-data">Data:</label>
-                <input type="date" id="mov-exame-data">
+                <label for="mov-exame-data">Data*:</label>
+                <input type="date" id="mov-exame-data" required>
                 <label for="mov-exame-tipo">Exame:</label>
                 <input type="text" id="mov-exame-tipo" placeholder="Tipo de exame">
                 <label for="mov-exame-valor">Valor (R$):</label>
@@ -251,24 +238,80 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>`;
         } else if (tipo === 'Saida') {
             html = `<div class="mov-row">
+                <label for="mov-saida-data">Data Saída*:</label>
+                <input type="date" id="mov-saida-data" required>
                 <label for="mov-saida-destino">Destino:</label>
                 <input type="text" id="mov-saida-destino" placeholder="Destino">
-                <label for="mov-saida-data">Data Saída:</label>
-                <input type="date" id="mov-saida-data">
                 <label for="mov-saida-valor">Valor (R$):</label>
                 <input type="number" id="mov-saida-valor" step="0.01">
             </div>`;
         } else if (tipo === 'Entrada') {
             html = `<div class="mov-row">
+                <label for="mov-entrada-data">Data*:</label>
+                <input type="date" id="mov-entrada-data" required>
                 <label for="mov-entrada-origem">De onde veio:</label>
                 <input type="text" id="mov-entrada-origem" placeholder="Origem">
-                <label for="mov-entrada-data">Data:</label>
-                <input type="date" id="mov-entrada-data">
                 <label for="mov-entrada-fornecedor">Fornecedor:</label>
                 <input type="text" id="mov-entrada-fornecedor" placeholder="Fornecedor">
             </div>`;
+        } else if (tipo === 'Vacina') {
+            html = `<div class="mov-row">
+                <label for="mov-vacina-data">Data*:</label>
+                <input type="date" id="mov-vacina-data" required>
+                <label for="mov-vacina-tipo">Tipo de Vacina:</label>
+                <input type="text" id="mov-vacina-tipo" placeholder="Vacina">
+                <label for="mov-vacina-lote">Lote:</label>
+                <input type="text" id="mov-vacina-lote" placeholder="Lote">
+                <label for="mov-vacina-resp">Responsável:</label>
+                <input type="text" id="mov-vacina-resp" placeholder="Responsável">
+            </div>`;
+        } else if (tipo === 'Vermifugacao') {
+            html = `<div class="mov-row">
+                <label for="mov-vermifugacao-data">Data*:</label>
+                <input type="date" id="mov-vermifugacao-data" required>
+                <label for="mov-vermifugacao-produto">Produto:</label>
+                <input type="text" id="mov-vermifugacao-produto" placeholder="Produto">
+                <label for="mov-vermifugacao-dose">Dose:</label>
+                <input type="text" id="mov-vermifugacao-dose" placeholder="Dose">
+                <label for="mov-vermifugacao-resp">Responsável:</label>
+                <input type="text" id="mov-vermifugacao-resp" placeholder="Responsável">
+            </div>`;
+        } else if (tipo === 'Transferencia') {
+            html = `<div class="mov-row">
+                <label for="mov-transferencia-data">Data*:</label>
+                <input type="date" id="mov-transferencia-data" required>
+                <label for="mov-transferencia-origem">Origem:</label>
+                <input type="text" id="mov-transferencia-origem" placeholder="Origem">
+                <label for="mov-transferencia-destino">Destino:</label>
+                <input type="text" id="mov-transferencia-destino" placeholder="Destino">
+                <label for="mov-transferencia-motivo">Motivo:</label>
+                <input type="text" id="mov-transferencia-motivo" placeholder="Motivo">
+            </div>`;
+        } else if (tipo === 'Cobricao') {
+            html = `<div class="mov-row">
+                <label for="mov-cobricao-data">Data*:</label>
+                <input type="date" id="mov-cobricao-data" required>
+                <label for="mov-cobricao-touro">Touro:</label>
+                <input type="text" id="mov-cobricao-touro" placeholder="Touro">
+                <label for="mov-cobricao-resultado">Resultado:</label>
+                <input type="text" id="mov-cobricao-resultado" placeholder="Resultado">
+            </div>`;
+        } else if (tipo === 'Outro') {
+            html = `<div class="mov-row">
+                <label for="mov-outro-data">Data*:</label>
+                <input type="date" id="mov-outro-data" required>
+                <label for="mov-outro-tipo">Tipo de Serviço:</label>
+                <input type="text" id="mov-outro-tipo" placeholder="Descreva o serviço">
+                <label for="mov-outro-desc">Descrição:</label>
+                <input type="text" id="mov-outro-desc" placeholder="Detalhes/Observação">
+            </div>`;
         }
         movDinamicaEl.innerHTML = html;
+        // Preencher veterinário se veio da página de cadastro
+        if (tipo === 'DG' && localStorage.getItem('vet_nome_temp')) {
+            document.getElementById('mov-dg-vet').value = localStorage.getItem('vet_nome_temp');
+            localStorage.removeItem('vet_nome_temp');
+        }
     }
 
     tipoServicoEl.addEventListener('change', (e) => {
@@ -371,25 +414,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const fotoContainer = document.getElementById('foto-animal-container');
     const fotoImg = document.getElementById('foto-animal');
     const fotoLabel = document.getElementById('foto-animal-label');
+    const fotoErro = document.getElementById('foto-animal-erro');
 
-    serieInput.addEventListener('input', function () {
-        const serie = this.value;
+    function atualizarFotoAnimal() {
+        const serie = serieInput.value;
         if (serie.length > 0) {
             const fotoPath = `fotos/${serie}.jpg`;
             fotoImg.src = fotoPath;
             fotoImg.onload = function () {
                 fotoContainer.style.display = 'block';
                 fotoLabel.textContent = `Foto do animal série: ${serie}`;
+                fotoErro.style.display = 'none';
             };
             fotoImg.onerror = function () {
-                fotoContainer.style.display = 'none';
+                fotoContainer.style.display = 'block';
                 fotoImg.src = '';
                 fotoLabel.textContent = '';
+                fotoErro.style.display = 'block';
             };
         } else {
             fotoContainer.style.display = 'none';
             fotoImg.src = '';
             fotoLabel.textContent = '';
+            fotoErro.style.display = 'none';
+        }
+    }
+    serieInput.addEventListener('input', atualizarFotoAnimal);
+    serieInput.addEventListener('blur', atualizarFotoAnimal);
+    serieInput.addEventListener('change', atualizarFotoAnimal);
+
+    // Selecionar raça automaticamente conforme prefixo da série
+    serieInput.addEventListener('input', function () {
+        const serie = this.value.toUpperCase();
+        if (serie.startsWith('CJCJ')) {
+            document.getElementById('raca').value = 'Nelore';
+        } else if (serie.startsWith('BENT')) {
+            document.getElementById('raca').value = 'Brahman';
+        } else if (serie.startsWith('CJCG')) {
+            document.getElementById('raca').value = 'Gir';
         }
     });
 
@@ -471,6 +533,36 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('valor-venda').value = '';
         }
     });
+
+    const rgInput = document.getElementById('rg');
+
+    function atualizarFotoAnimalPorRG() {
+        const rg = rgInput.value;
+        if (rg.length > 0) {
+            const fotoPath = `fotos/${rg}.jpg`;
+            fotoImg.src = fotoPath;
+            fotoImg.onload = function () {
+                fotoContainer.style.display = 'block';
+                fotoLabel.textContent = `Foto do animal RG: ${rg}`;
+                fotoErro.style.display = 'none';
+            };
+            fotoImg.onerror = function () {
+                fotoContainer.style.display = 'block';
+                fotoImg.src = '';
+                fotoLabel.textContent = '';
+                fotoErro.style.display = 'block';
+            };
+        } else {
+            fotoContainer.style.display = 'none';
+            fotoImg.src = '';
+            fotoLabel.textContent = '';
+            fotoErro.style.display = 'none';
+        }
+    }
+
+    rgInput.addEventListener('input', atualizarFotoAnimalPorRG);
+    rgInput.addEventListener('blur', atualizarFotoAnimalPorRG);
+    rgInput.addEventListener('change', atualizarFotoAnimalPorRG);
 
     renderizarTabela();
 });

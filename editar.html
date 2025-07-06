@@ -4,34 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Custo Bovino</title>
+    <title>Editar Animal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <header>
-        <img src="img/logo.png" alt="Logo" style="max-height:64px; display:block; margin:0 auto 0.5rem auto;">
-        <h1>Gestão de Custo Individual de Bovinos</h1>
+        <h1>Editar Animal</h1>
     </header>
-
     <main>
-        <!-- Cards de Resumo -->
-        <section id="resumo-section" style="display:flex; align-items:center; gap:1.5rem;">
-            <div class="card-resumo">
-                <h3>Animais Cadastrados</h3>
-                <div id="total-animais">0</div>
-            </div>
-            <div class="card-resumo">
-                <h3>Último Cadastrado</h3>
-                <div id="ultimo-animal">-</div>
-            </div>
-            <img id="foto-card-ultimo" src="" alt="Foto do último animal"
-                style="display:none; width:280px; height:220px; object-fit:cover; border-radius:8px; border:1.5px solid #ccc;">
-        </section>
-
         <section id="form-section">
-            <h2>Cadastro de Animal</h2>
-            <form id="animal-form">
+            <form id="editar-animal-form">
                 <div class="form-row-group">
                     <div class="form-row">
                         <label for="serie">Série:</label>
@@ -80,17 +63,6 @@
                         <input type="number" id="valor-venda" step="0.01" readonly>
                     </div>
                 </div>
-                <!-- Área para exibir a foto do animal -->
-                <div id="foto-animal-container" style="display:none; text-align:center; margin-bottom:1rem;">
-                    <img id="foto-animal" src="" alt="Foto do animal"
-                        style="max-width:180px; max-height:180px; border-radius:8px; border:1.5px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div id="foto-animal-label" style="margin-top:0.5rem; color:#555; font-size:0.95rem;"></div>
-                    <div id="foto-animal-erro"
-                        style="color:#d32f2f; font-size:0.95rem; margin-top:0.3rem; display:none;">Foto não encontrada
-                        para esta série.</div>
-                </div>
-
-                <!-- Movimentação dinâmica -->
                 <div class="form-row">
                     <label for="tipo-servico">Tipo de Serviço:</label>
                     <select id="tipo-servico" required>
@@ -100,54 +72,22 @@
                         <option value="Exame">Exame</option>
                         <option value="Saida">Saída</option>
                         <option value="Entrada">Entrada</option>
-                        <option value="Vacina">Vacina</option>
-                        <option value="Vermifugacao">Vermifugação</option>
-                        <option value="Transferencia">Transferência</option>
-                        <option value="Cobricao">Cobrição</option>
-                        <option value="Outro">Outro</option>
                     </select>
                 </div>
                 <div id="movimentacao-dinamica"></div>
-
                 <div class="form-actions">
-                    <button type="submit">Salvar</button>
-                    <button type="reset">Limpar</button>
+                    <button type="submit">Salvar Alterações</button>
+                    <a href="index.html" class="button"
+                        style="margin-left:1rem; text-decoration:none; display:inline-block;">Voltar</a>
                 </div>
             </form>
         </section>
-
-        <section id="list-section">
-            <h2>Lista de Animais</h2>
-            <div style="margin-bottom:1rem; display:flex; gap:1rem;">
-                <input type="file" id="importar-excel" accept=".xlsx,.csv" style="display:none;">
-                <button type="button" id="btn-importar">Importar Excel</button>
-                <button type="button" id="btn-exportar">Exportar Dados</button>
-            </div>
-            <table id="animal-table">
-                <thead>
-                    <tr>
-                        <th>Série</th>
-                        <th>RG</th>
-                        <th>Sexo</th>
-                        <th>Raça</th>
-                        <th>Custo</th>
-                        <th>Venda</th>
-                        <th>Lucro/Prejuízo</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </section>
     </main>
-
     <footer>
         <p>© 2025 - Sistema de Gestão de Rebanho</p>
     </footer>
-
-    <!-- SheetJS para importação/exportação Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="script.js"></script>
+    <script src="editar.js"></script>
 </body>
 
 </html>

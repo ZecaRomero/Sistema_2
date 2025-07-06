@@ -181,7 +181,7 @@ section {
     margin-top: 1rem;
 }
 
-button {
+.button {
     padding: 0.6rem 1.2rem;
     border: none;
     border-radius: 5px;
@@ -190,10 +190,12 @@ button {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
+    font-size: 1rem;
 }
-
-button:hover {
+.button:hover {
     background-color: #004d40;
+    color: #fff;
+    text-decoration: none;
 }
 
 button:disabled {

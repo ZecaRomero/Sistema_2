@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Veterinário</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Cadastrar Veterinário</h1>
+    </header>
+    <main>
+        <section id="form-section">
+            <form id="form-vet">
+                <div class="form-row">
+                    <label for="nome-vet">Nome do Veterinário:</label>
+                    <input type="text" id="nome-vet" required autocomplete="off">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Salvar</button>
+                    <a href="index.html" class="button"
+                        style="margin-left:1rem; text-decoration:none; display:inline-block;">Voltar</a>
+                </div>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 - Sistema de Gestão de Rebanho</p>
+    </footer>
+    <script>
+        document.getElementById('form-vet').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const nome = document.getElementById('nome-vet').value.trim();
+            if (nome) {
+                localStorage.setItem('vet_nome_temp', nome);
+                window.location.href = document.referrer && document.referrer.includes('editar.html') ? 'editar.html' : 'index.html';
+            }
+        });
+    </script>
+</body>
+
+</html>
