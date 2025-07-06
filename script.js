@@ -23,9 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
         rg: {
             validar: (valor) => {
                 if (!valor || valor.trim() === '') return 'RG é obrigatório';
-                if (valor.length < 5) return 'RG deve ter pelo menos 5 caracteres';
-                if (valor.length > 15) return 'RG deve ter no máximo 15 caracteres';
-                if (!/^[0-9\.\-]+$/.test(valor)) return 'RG deve conter apenas números, pontos e hífens';
+                if (valor.length < 1) return 'RG deve ter pelo menos 1 número';
+                if (valor.length > 6) return 'RG deve ter no máximo 6 números';
+                if (!/^[0-9]+$/.test(valor)) return 'RG deve conter apenas números';
                 return null;
             },
             formatar: (valor) => valor.replace(/[^\d]/g, '').replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4')
@@ -143,21 +143,26 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("animais", JSON.stringify(animais));
     }
 
-    function renderizarResumo() {
+    // Navegação entre animais
+    let animalSelecionadoIdx = animais.length > 0 ? animais.length - 1 : -1;
+    const btnAnterior = document.getElementById('btn-anterior');
+    const btnProximo = document.getElementById('btn-proximo');
+
+    function renderizarResumo(idx) {
         if (totalAnimaisEl) totalAnimaisEl.textContent = animais.length;
         if (ultimoAnimalEl) {
-            if (animais.length > 0) {
-                const ultimo = animais[animais.length - 1];
-                ultimoAnimalEl.textContent = `${ultimo.serie} (${ultimo.rg})`;
-                // Exibir foto ao lado do card usando RG do último animal
-                const fotoPath = `fotos/${ultimo.rg}.jpg`;
+            if (animais.length > 0 && idx >= 0 && idx < animais.length) {
+                const animal = animais[idx];
+                ultimoAnimalEl.textContent = `${animal.serie} (${animal.rg})`;
+                // Exibir foto ao lado do card usando RG do animal selecionado
+                const fotoPath = `fotos/${animal.rg}.jpg`;
                 fotoImg.src = fotoPath;
-                fotoImg.onload = function() {
+                fotoImg.onload = function () {
                     fotoContainer.style.display = 'block';
-                    fotoLabel.textContent = `Foto do animal RG: ${ultimo.rg}`;
+                    fotoLabel.textContent = `Foto do animal RG: ${animal.rg}`;
                     fotoErro.style.display = 'none';
                 };
-                fotoImg.onerror = function() {
+                fotoImg.onerror = function () {
                     fotoContainer.style.display = 'block';
                     fotoImg.src = '';
                     fotoLabel.textContent = '';
@@ -171,7 +176,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 fotoErro.style.display = 'none';
             }
         }
+        // Habilitar/desabilitar botões
+        btnAnterior.disabled = (animalSelecionadoIdx <= 0);
+        btnProximo.disabled = (animalSelecionadoIdx >= animais.length - 1);
     }
+
+    btnAnterior.addEventListener('click', () => {
+        if (animalSelecionadoIdx > 0) {
+            animalSelecionadoIdx--;
+            renderizarResumo(animalSelecionadoIdx);
+        }
+    });
+    btnProximo.addEventListener('click', () => {
+        if (animalSelecionadoIdx < animais.length - 1) {
+            animalSelecionadoIdx++;
+            renderizarResumo(animalSelecionadoIdx);
+        }
+    });
 
     function renderizarTabela() {
         tabela.innerHTML = "";
@@ -187,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${animal.raca}</td>
                 <td>R$ ${parseFloat(animal.custo).toFixed(2)}</td>
                 <td>R$ ${parseFloat(animal.venda).toFixed(2)}</td>
-                <td class="${classeLucro}">R$ ${lucroPrejuizo.toFixed(2)}</td>
+                <td class="${classeLucro} lucro-prejuizo-cell" style="cursor:pointer;" data-index="${index}">R$ ${lucroPrejuizo.toFixed(2)}</td>
                 <td class="actions">
                     <button onclick="editarAnimal(${index})">Editar</button>
                     <button onclick="excluirAnimal(${index})">Excluir</button>
@@ -195,7 +216,19 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             tabela.appendChild(linha);
         });
-        renderizarResumo();
+        // Sempre mostrar o último cadastrado ao atualizar a tabela
+        animalSelecionadoIdx = animais.length > 0 ? animais.length - 1 : -1;
+        renderizarResumo(animalSelecionadoIdx);
+
+        // Adicionar evento de clique para detalhar lucro/prejuízo
+        document.querySelectorAll('.lucro-prejuizo-cell').forEach(cell => {
+            cell.addEventListener('click', function () {
+                const idx = parseInt(this.getAttribute('data-index'));
+                const animal = animais[idx];
+                const lucroPrejuizo = parseFloat(animal.venda) - parseFloat(animal.custo);
+                abrirModalDetalhe(animal, lucroPrejuizo);
+            });
+        });
     }
 
     window.editarAnimal = function (index) {
@@ -490,6 +523,11 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('raca').value = 'Brahman';
         } else if (serie.startsWith('CJCG')) {
             document.getElementById('raca').value = 'Gir';
+        } else if (serie.startsWith('Recep'.toUpperCase())) {
+            document.getElementById('raca').value = 'Receptoras';
+            document.getElementById('sexo').value = 'Fêmea';
+            document.getElementById('nascimento').value = '';
+            document.getElementById('meses').value = 25;
         }
     });
 
@@ -602,10 +640,37 @@ document.addEventListener("DOMContentLoaded", () => {
     rgInput.addEventListener('blur', atualizarFotoAnimalPorRG);
     rgInput.addEventListener('change', atualizarFotoAnimalPorRG);
 
-    // Bloquear caracteres não permitidos em RG (apenas 6 números)
+    // Bloquear caracteres não permitidos em RG (apenas 1 a 6 números)
     rgInput.addEventListener('input', function (e) {
         this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
     });
+
+    // Modal de detalhamento
+    const modal = document.getElementById('modal-detalhe');
+    const modalContent = document.getElementById('modal-detalhe-content');
+    const modalFechar = document.getElementById('modal-detalhe-fechar');
+    const modalFoto = document.getElementById('modal-detalhe-foto');
+    const modalTitulo = document.getElementById('modal-detalhe-titulo');
+    const modalInfo = document.getElementById('modal-detalhe-info');
+    const modalLucro = document.getElementById('modal-detalhe-lucro');
+
+    function abrirModalDetalhe(animal, lucroPrejuizo) {
+        // Foto
+        const fotoPath = `fotos/${animal.rg}.jpg`;
+        modalFoto.innerHTML = `<img src="${fotoPath}" alt="Foto do animal" style="max-width:120px; max-height:90px; border-radius:8px; border:1.5px solid #ccc; margin-bottom:0.3rem;">`;
+        // Título
+        modalTitulo.textContent = `${animal.serie} (${animal.rg})`;
+        // Info
+        modalInfo.innerHTML = `Sexo: <b>${animal.sexo}</b> &nbsp;|&nbsp; Raça: <b>${animal.raca}</b><br>Custo: <b>R$ ${parseFloat(animal.custo).toFixed(2)}</b> &nbsp;|&nbsp; Venda: <b>R$ ${parseFloat(animal.venda).toFixed(2)}</b>`;
+        // Lucro/prejuízo
+        const cor = lucroPrejuizo >= 0 ? '#388e3c' : '#d32f2f';
+        const bg = lucroPrejuizo >= 0 ? '#e8f5e8' : '#ffebee';
+        const icone = lucroPrejuizo >= 0 ? '✔️' : '⚠️';
+        modalLucro.innerHTML = `<span style="color:${cor}; background:${bg}; padding:0.3rem 0.7rem; border-radius:6px;">${icone} ${lucroPrejuizo >= 0 ? 'Lucro' : 'Prejuízo'}: R$ ${lucroPrejuizo.toFixed(2)}</span>`;
+        modal.style.display = 'flex';
+    }
+    modalFechar.onclick = () => { modal.style.display = 'none'; };
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
     renderizarTabela();
 });

@@ -17,6 +17,13 @@
     <main>
         <!-- Cards de Resumo -->
         <section id="resumo-section" style="display:flex; align-items:center; gap:1.5rem;">
+            <button id="btn-anterior"
+                style="background:none; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M28 35L13 20L28 5" stroke="#004d40" stroke-width="5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
             <div class="card-resumo">
                 <h3>Animais Cadastrados</h3>
                 <div id="total-animais">0</div>
@@ -32,6 +39,13 @@
                 <div id="foto-animal-erro" style="color:#d32f2f; font-size:0.95rem; margin-top:0.3rem; display:none;">
                     Foto não encontrada para esta série.</div>
             </div>
+            <button id="btn-proximo"
+                style="background:none; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 35L27 20L12 5" stroke="#004d40" stroke-width="5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
         </section>
 
         <section id="form-section">
@@ -45,7 +59,7 @@
                     </div>
                     <div class="form-row">
                         <label for="rg">RG:</label>
-                        <input type="text" id="rg" required maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
+                        <input type="text" id="rg" required maxlength="6" minlength="1" inputmode="numeric"
                             autocomplete="off">
                     </div>
                     <div class="form-row">
@@ -145,6 +159,20 @@
     <!-- SheetJS para importação/exportação Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="script.js"></script>
+
+    <!-- Modal de detalhamento de lucro/prejuízo -->
+    <div id="modal-detalhe"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:1000; align-items:center; justify-content:center;">
+        <div id="modal-detalhe-content"
+            style="background:#fff; border-radius:12px; max-width:350px; width:90vw; margin:auto; padding:2rem 1.2rem 1.2rem 1.2rem; box-shadow:0 8px 32px rgba(0,0,0,0.18); position:relative; text-align:center;">
+            <button id="modal-detalhe-fechar"
+                style="position:absolute; top:10px; right:14px; background:none; border:none; font-size:1.7rem; color:#888; cursor:pointer;">&times;</button>
+            <div id="modal-detalhe-foto" style="margin-bottom:1rem;"></div>
+            <h2 id="modal-detalhe-titulo" style="margin-bottom:0.5rem;"></h2>
+            <div id="modal-detalhe-info" style="font-size:1.05rem; margin-bottom:0.7rem;"></div>
+            <div id="modal-detalhe-lucro" style="font-size:1.2rem; font-weight:bold;"></div>
+        </div>
+    </div>
 </body>
 
 </html>
