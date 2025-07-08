@@ -287,399 +287,103 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipoServicoEl = document.getElementById('tipo-servico');
     const movDinamicaEl = document.getElementById('movimentacao-dinamica');
 
+    // Mapeamento dos campos por tipo de serviço
+    const camposPorTipo = {
+        "Peso": [
+            { label: "Data", id: "mov-peso-data", type: "date", required: true },
+            { label: "Peso (kg)", id: "mov-peso-valor", type: "number", step: "0.01", required: true },
+            { label: "Local", id: "mov-peso-local", type: "text", required: false }
+        ],
+        "Diagnóstico de Gestação": [
+            { label: "Data", id: "mov-dg-data", type: "date", required: true },
+            { label: "Resultado", id: "mov-dg-resultado", type: "text", required: true }
+        ],
+        "Exame": [
+            { label: "Data", id: "mov-exame-data", type: "date", required: true },
+            { label: "Tipo de Exame", id: "mov-exame-tipo", type: "text", required: true },
+            { label: "Resultado", id: "mov-exame-resultado", type: "text", required: false }
+        ],
+        "Saída": [
+            { label: "Data Saída", id: "mov-saida-data", type: "date", required: true },
+            { label: "Destino", id: "mov-saida-destino", type: "text", required: true },
+            { label: "Motivo", id: "mov-saida-motivo", type: "text", required: false }
+        ],
+        "Entrada": [
+            { label: "Data", id: "mov-entrada-data", type: "date", required: true },
+            { label: "Origem", id: "mov-entrada-origem", type: "text", required: true },
+            { label: "Fornecedor", id: "mov-entrada-fornecedor", type: "text", required: false }
+        ],
+        "Vacina": [
+            { label: "Data", id: "mov-vacina-data", type: "date", required: true },
+            { label: "Tipo de Vacina", id: "mov-vacina-tipo", type: "text", required: true }
+        ],
+        "Vermifugacao": [
+            { label: "Data", id: "mov-vermifugacao-data", type: "date", required: true },
+            { label: "Produto", id: "mov-vermifugacao-produto", type: "text", required: true }
+        ],
+        "Transferencia": [
+            { label: "Data", id: "mov-transferencia-data", type: "date", required: true },
+            { label: "Origem", id: "mov-transferencia-origem", type: "text", required: true },
+            { label: "Destino", id: "mov-transferencia-destino", type: "text", required: true }
+        ],
+        "Cobricao": [
+            { label: "Data", id: "mov-cobricao-data", type: "date", required: true },
+            { label: "Touro", id: "mov-cobricao-touro", type: "text", required: true }
+        ],
+        "Outro": [
+            { label: "Data", id: "mov-outro-data", type: "date", required: true },
+            { label: "Tipo de Serviço", id: "mov-outro-tipo", type: "text", required: true },
+            { label: "Descrição", id: "mov-outro-desc", type: "text", required: false }
+        ],
+        "Brinco": [
+            { label: "Data", id: "mov-brinco-data", type: "date", required: true },
+            { label: "Valor (R$)", id: "mov-brinco-valor", type: "number", step: "0.01", required: true }
+        ]
+    };
+
     function renderizarCamposMovimentacao(tipo) {
-        let html = '';
-        if (tipo === 'Peso') {
-            html = `<div class="mov-row">
-                <label for="mov-peso-data">Data*:</label>
-                <input type="date" id="mov-peso-data" required>
-                <label for="mov-peso-valor">Peso (kg):</label>
-                <input type="number" id="mov-peso-valor" step="0.01">
-            </div>`;
-        } else if (tipo === 'DG') {
-            // Carregar veterinários cadastrados
-            let vets = JSON.parse(localStorage.getItem('veterinarios') || '[]');
-            let options = vets.map(v => `<option value="${v}">${v}</option>`).join('');
-            html = `<div class="mov-row">
-                <label for="mov-dg-data">Data*:</label>
-                <input type="date" id="mov-dg-data" required>
-                <label for="mov-dg-vet">Veterinário:</label>
-                <select id="mov-dg-vet-select" style="width:130px; margin-right:0.5rem;">
-                    <option value="">Escolha</option>
-                    ${options}
-                </select>
-                <input type="text" id="mov-dg-vet" placeholder="Nome do veterinário" style="width:120px;">
-                <a href="veterinario.html" class="button" style="padding:0.3rem 0.7rem; font-size:0.95rem; margin-left:0.5rem;">Adicionar Veterinário</a>
-                <label for="mov-dg-resultado">Resultado:</label>
-                <input type="text" id="mov-dg-resultado" placeholder="Resultado">
-            </div>`;
-        } else if (tipo === 'Exame') {
-            html = `<div class="mov-row">
-                <label for="mov-exame-data">Data*:</label>
-                <input type="date" id="mov-exame-data" required>
-                <label for="mov-exame-tipo">Exame:</label>
-                <input type="text" id="mov-exame-tipo" placeholder="Tipo de exame">
-                <label for="mov-exame-valor">Valor (R$):</label>
-                <input type="number" id="mov-exame-valor" step="0.01">
-            </div>`;
-        } else if (tipo === 'Saida') {
-            html = `<div class="mov-row">
-                <label for="mov-saida-data">Data Saída*:</label>
-                <input type="date" id="mov-saida-data" required>
-                <label for="mov-saida-destino">Destino:</label>
-                <input type="text" id="mov-saida-destino" placeholder="Destino">
-                <label for="mov-saida-valor">Valor (R$):</label>
-                <input type="number" id="mov-saida-valor" step="0.01">
-            </div>`;
-        } else if (tipo === 'Entrada') {
-            html = `<div class="mov-row">
-                <label for="mov-entrada-data">Data*:</label>
-                <input type="date" id="mov-entrada-data" required>
-                <label for="mov-entrada-origem">De onde veio:</label>
-                <input type="text" id="mov-entrada-origem" placeholder="Origem">
-                <label for="mov-entrada-fornecedor">Fornecedor:</label>
-                <input type="text" id="mov-entrada-fornecedor" placeholder="Fornecedor">
-            </div>`;
-        } else if (tipo === 'Vacina') {
-            html = `<div class="mov-row">
-                <label for="mov-vacina-data">Data*:</label>
-                <input type="date" id="mov-vacina-data" required>
-                <label for="mov-vacina-tipo">Tipo de Vacina:</label>
-                <input type="text" id="mov-vacina-tipo" placeholder="Vacina">
-                <label for="mov-vacina-lote">Lote:</label>
-                <input type="text" id="mov-vacina-lote" placeholder="Lote">
-                <label for="mov-vacina-resp">Responsável:</label>
-                <input type="text" id="mov-vacina-resp" placeholder="Responsável">
-            </div>`;
-        } else if (tipo === 'Vermifugacao') {
-            html = `<div class="mov-row">
-                <label for="mov-vermifugacao-data">Data*:</label>
-                <input type="date" id="mov-vermifugacao-data" required>
-                <label for="mov-vermifugacao-produto">Produto:</label>
-                <input type="text" id="mov-vermifugacao-produto" placeholder="Produto">
-                <label for="mov-vermifugacao-dose">Dose:</label>
-                <input type="text" id="mov-vermifugacao-dose" placeholder="Dose">
-                <label for="mov-vermifugacao-resp">Responsável:</label>
-                <input type="text" id="mov-vermifugacao-resp" placeholder="Responsável">
-            </div>`;
-        } else if (tipo === 'Transferencia') {
-            html = `<div class="mov-row">
-                <label for="mov-transferencia-data">Data*:</label>
-                <input type="date" id="mov-transferencia-data" required>
-                <label for="mov-transferencia-origem">Origem:</label>
-                <input type="text" id="mov-transferencia-origem" placeholder="Origem">
-                <label for="mov-transferencia-destino">Destino:</label>
-                <input type="text" id="mov-transferencia-destino" placeholder="Destino">
-                <label for="mov-transferencia-motivo">Motivo:</label>
-                <input type="text" id="mov-transferencia-motivo" placeholder="Motivo">
-            </div>`;
-        } else if (tipo === 'Cobricao') {
-            html = `<div class="mov-row">
-                <label for="mov-cobricao-data">Data*:</label>
-                <input type="date" id="mov-cobricao-data" required>
-                <label for="mov-cobricao-touro">Touro:</label>
-                <input type="text" id="mov-cobricao-touro" placeholder="Touro">
-                <label for="mov-cobricao-resultado">Resultado:</label>
-                <input type="text" id="mov-cobricao-resultado" placeholder="Resultado">
-            </div>`;
-        } else if (tipo === 'Outro') {
-            html = `<div class="mov-row">
-                <label for="mov-outro-data">Data*:</label>
-                <input type="date" id="mov-outro-data" required>
-                <label for="mov-outro-tipo">Tipo de Serviço:</label>
-                <input type="text" id="mov-outro-tipo" placeholder="Descreva o serviço">
-                <label for="mov-outro-desc">Descrição:</label>
-                <input type="text" id="mov-outro-desc" placeholder="Detalhes/Observação">
-            </div>`;
-        } else if (tipo === 'Brinco') {
-            html = `<div class="mov-row">
-                <label for="mov-brinco-data">Data*:</label>
-                <input type="date" id="mov-brinco-data" required>
-                <label for="mov-brinco-valor">Valor (R$)*:</label>
-                <input type="number" id="mov-brinco-valor" step="0.01" required>
-            </div>`;
-        }
-        movDinamicaEl.innerHTML = html;
-        // Preencher veterinário se veio da página de cadastro
-        if (tipo === 'DG' && localStorage.getItem('vet_nome_temp')) {
-            document.getElementById('mov-dg-vet').value = localStorage.getItem('vet_nome_temp');
-            localStorage.removeItem('vet_nome_temp');
-        }
-        // Ao escolher no select, preenche o campo texto
-        const vetSelect = document.getElementById('mov-dg-vet-select');
-        const vetInput = document.getElementById('mov-dg-vet');
-        vetSelect.addEventListener('change', function () {
-            vetInput.value = this.value;
-        });
-    }
-
-    tipoServicoEl.addEventListener('change', (e) => {
-        renderizarCamposMovimentacao(e.target.value);
-    });
-
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        // Validar todos os campos obrigatórios
-        const campos = ['serie', 'rg', 'sexo', 'raca']; // valor-venda não é obrigatório
-        let todosValidos = true;
-
+        const container = document.getElementById('movimentacao-dinamica');
+        container.innerHTML = '';
+        const campos = camposPorTipo[tipo] || [];
         campos.forEach(campo => {
-            const tipo = campo === 'valor-venda' ? 'valorVenda' : campo;
-            if (!aplicarValidacao(campo, tipo)) {
-                todosValidos = false;
-            }
+            const div = document.createElement('div');
+            div.className = 'form-row';
+            const label = document.createElement('label');
+            label.htmlFor = campo.id;
+            label.textContent = campo.label + (campo.required ? ' *' : '');
+            const input = document.createElement('input');
+            input.type = campo.type;
+            input.id = campo.id;
+            input.name = campo.id;
+            if (campo.step) input.step = campo.step;
+            if (campo.required) input.required = true;
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
         });
-
-        if (!todosValidos) {
-            alert('Por favor, corrija os erros antes de salvar.');
-            return;
-        }
-
-        // Movimentação dinâmica
-        const tipoServico = tipoServicoEl.value;
-        let movimentacao = { tipo: tipoServico };
-        if (tipoServico === 'Peso') {
-            movimentacao.data = document.getElementById('mov-peso-data').value;
-            movimentacao.peso = document.getElementById('mov-peso-valor').value;
-        } else if (tipoServico === 'DG') {
-            movimentacao.data = document.getElementById('mov-dg-data').value;
-            movimentacao.veterinario = document.getElementById('mov-dg-vet').value;
-            movimentacao.resultado = document.getElementById('mov-dg-resultado').value;
-        } else if (tipoServico === 'Exame') {
-            movimentacao.data = document.getElementById('mov-exame-data').value;
-            movimentacao.exame = document.getElementById('mov-exame-tipo').value;
-            movimentacao.valor = document.getElementById('mov-exame-valor').value;
-        } else if (tipoServico === 'Saida') {
-            movimentacao.destino = document.getElementById('mov-saida-destino').value;
-            movimentacao.data = document.getElementById('mov-saida-data').value;
-            movimentacao.valor = document.getElementById('mov-saida-valor').value;
-        } else if (tipoServico === 'Entrada') {
-            movimentacao.origem = document.getElementById('mov-entrada-origem').value;
-            movimentacao.data = document.getElementById('mov-entrada-data').value;
-            movimentacao.fornecedor = document.getElementById('mov-entrada-fornecedor').value;
-        } else if (tipoServico === 'Brinco') {
-            movimentacao.data = document.getElementById('mov-brinco-data').value;
-            movimentacao.valor = document.getElementById('mov-brinco-valor').value;
-        }
-
-        // Cálculo do custo total
-        let custo = document.getElementById("custo").value || 0;
-        if (tipoServico === 'Brinco') {
-            const valorBrinco = parseFloat(document.getElementById('mov-brinco-valor').value) || 0;
-            custo = (parseFloat(custo) || 0) + valorBrinco;
-        }
-
-        const novoAnimal = {
-            serie: validadores.serie.formatar(document.getElementById("serie").value),
-            rg: validadores.rg.formatar(document.getElementById("rg").value),
-            sexo: validadores.sexo.formatar(document.getElementById("sexo").value),
-            raca: validadores.raca.formatar(document.getElementById("raca").value),
-            custo: custo,
-            venda: validadores.valorVenda.formatar(document.getElementById("valor-venda").value),
-            nascimento: document.getElementById("nascimento").value,
-            meses: document.getElementById("meses").value,
-            movimentacao
-        };
-
-        animais.push(novoAnimal);
-        salvarNoStorage();
-        renderizarTabela();
-        form.reset();
-        movDinamicaEl.innerHTML = '';
-        tipoServicoEl.value = '';
-        // Limpar classes de validação
-        campos.forEach(campo => {
-            document.getElementById(campo).classList.remove('erro', 'sucesso');
-            removerMensagemErro(document.getElementById(campo));
-        });
-    });
-
-    // Calcular meses automaticamente ao preencher nascimento
-    document.getElementById('nascimento').addEventListener('change', function () {
-        const nascimento = this.value;
-        const mesesInput = document.getElementById('meses');
-        if (nascimento) {
-            const nascDate = new Date(nascimento);
-            const hoje = new Date();
-            let anos = hoje.getFullYear() - nascDate.getFullYear();
-            let meses = hoje.getMonth() - nascDate.getMonth();
-            if (meses < 0) {
-                anos--;
-                meses += 12;
-            }
-            let totalMeses = anos * 12 + meses;
-            if (hoje.getDate() < nascDate.getDate()) {
-                totalMeses--;
-            }
-            mesesInput.value = totalMeses >= 0 ? totalMeses : 0;
-        } else {
-            mesesInput.value = '';
-        }
-    });
-
-    // Exibir foto do animal ao digitar a série
-    const serieInput = document.getElementById('serie');
-    const fotoContainer = document.getElementById('foto-animal-container');
-    const fotoImg = document.getElementById('foto-animal');
-    const fotoLabel = document.getElementById('foto-animal-label');
-    const fotoErro = document.getElementById('foto-animal-erro');
-
-    function atualizarFotoAnimal() {
-        const serie = serieInput.value;
-        if (serie.length > 0) {
-            const fotoPath = `fotos/${serie}.jpg`;
-            fotoImg.src = fotoPath;
-            fotoImg.onload = function () {
-                fotoContainer.style.display = 'block';
-                fotoLabel.textContent = `Foto do animal série: ${serie}`;
-                fotoErro.style.display = 'none';
-            };
-            fotoImg.onerror = function () {
-                fotoContainer.style.display = 'block';
-                fotoImg.src = '';
-                fotoLabel.textContent = '';
-                fotoErro.style.display = 'none';
-            };
-        } else {
-            fotoContainer.style.display = 'none';
-            fotoImg.src = '';
-            fotoLabel.textContent = '';
-            fotoErro.style.display = 'none';
-        }
-    }
-    serieInput.addEventListener('input', atualizarFotoAnimal);
-    serieInput.addEventListener('blur', atualizarFotoAnimal);
-    serieInput.addEventListener('change', atualizarFotoAnimal);
-
-    // Selecionar raça automaticamente conforme prefixo da série
-    serieInput.addEventListener('input', function () {
-        const serie = this.value.toUpperCase();
-        if (serie.startsWith('CJCJ')) {
-            document.getElementById('raca').value = 'Nelore';
-        } else if (serie.startsWith('BENT')) {
-            document.getElementById('raca').value = 'Brahman';
-        } else if (serie.startsWith('CJCG')) {
-            document.getElementById('raca').value = 'Gir';
-        } else if (serie.startsWith('Recep'.toUpperCase())) {
-            document.getElementById('raca').value = 'Receptoras';
-            document.getElementById('sexo').value = 'Fêmea';
-            document.getElementById('nascimento').value = '';
-            document.getElementById('meses').value = 25;
-        }
-    });
-
-    // Importação e exportação Excel/CSV
-    const btnImportar = document.getElementById('btn-importar');
-    const btnExportar = document.getElementById('btn-exportar');
-    const inputImportar = document.getElementById('importar-excel');
-
-    btnImportar.addEventListener('click', () => {
-        inputImportar.value = '';
-        inputImportar.click();
-    });
-
-    inputImportar.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-            // Espera colunas: serie, rg, sexo, raca, nascimento, meses, custo, venda, movimentacao (opcional)
-            json.forEach(row => {
-                // Adaptação para campos obrigatórios
-                if (row.serie && row.rg) {
-                    animais.push({
-                        serie: row.serie,
-                        rg: row.rg,
-                        sexo: row.sexo || '',
-                        raca: row.raca || '',
-                        nascimento: row.nascimento || '',
-                        meses: row.meses || '',
-                        custo: row.custo || 0,
-                        venda: row.venda || 0,
-                        movimentacao: row.movimentacao || {}
-                    });
-                }
-            });
-            salvarNoStorage();
-            renderizarTabela();
-            alert('Importação concluída!');
-        };
-        reader.readAsArrayBuffer(file);
-    });
-
-    btnExportar.addEventListener('click', () => {
-        // Exportar todos os animais para Excel
-        const exportar = animais.map(animal => ({
-            serie: animal.serie,
-            rg: animal.rg,
-            sexo: animal.sexo,
-            raca: animal.raca,
-            nascimento: animal.nascimento,
-            meses: animal.meses,
-            custo: animal.custo,
-            venda: animal.venda,
-            movimentacao: JSON.stringify(animal.movimentacao || {})
-        }));
-        const ws = XLSX.utils.json_to_sheet(exportar);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Animais');
-        XLSX.writeFile(wb, 'animais.xlsx');
-    });
-
-    // Preencher valor de venda automaticamente ao cadastrar saída
-    document.getElementById('tipo-servico').addEventListener('change', function () {
-        if (this.value === 'Saida') {
-            // Quando o campo de valor da saída for preenchido, atualizar valor-venda
-            setTimeout(() => {
-                const saidaValorInput = document.getElementById('mov-saida-valor');
-                if (saidaValorInput) {
-                    saidaValorInput.addEventListener('input', function () {
-                        document.getElementById('valor-venda').value = this.value;
-                    });
-                }
-            }, 100); // aguarda renderização dos campos dinâmicos
-        } else {
-            document.getElementById('valor-venda').value = '';
-        }
-    });
-
-    const rgInput = document.getElementById('rg');
-
-    function atualizarFotoAnimalPorRG() {
-        const rg = rgInput.value;
-        if (rg.length > 0) {
-            const fotoPath = `fotos/${rg}.jpg`;
-            fotoImg.src = fotoPath;
-            fotoImg.onload = function () {
-                fotoContainer.style.display = 'block';
-                fotoLabel.textContent = `Foto do animal RG: ${rg}`;
-                fotoErro.style.display = 'none';
-            };
-            fotoImg.onerror = function () {
-                fotoContainer.style.display = 'block';
-                fotoImg.src = '';
-                fotoLabel.textContent = '';
-                fotoErro.style.display = 'none';
-            };
-        } else {
-            fotoContainer.style.display = 'none';
-            fotoImg.src = '';
-            fotoLabel.textContent = '';
-            fotoErro.style.display = 'none';
-        }
     }
 
-    rgInput.addEventListener('input', atualizarFotoAnimalPorRG);
-    rgInput.addEventListener('blur', atualizarFotoAnimalPorRG);
-    rgInput.addEventListener('change', atualizarFotoAnimalPorRG);
+    // Formatação automática do RG
+    document.getElementById('rg').addEventListener('input', (e) => {
+        let valor = e.target.value.replace(/\D/g, '');
+        if (valor.length <= 9) {
+            valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
+        }
+        e.target.value = valor;
+    });
+
+    // Formatação automática do valor de venda
+    document.getElementById('valor-venda').addEventListener('input', (e) => {
+        let valor = e.target.value.replace(/[^\d,.]/g, '');
+        valor = valor.replace(',', '.');
+        const num = parseFloat(valor);
+        if (!isNaN(num)) {
+            e.target.value = num.toFixed(2);
+        }
+    });
 
     // Bloquear caracteres não permitidos em RG (apenas 1 a 6 números)
-    rgInput.addEventListener('input', function (e) {
+    document.getElementById('rg').addEventListener('input', function (e) {
         this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
     });
 
@@ -784,4 +488,313 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     renderizarTabela();
+});
+
+// Tipos de serviço iniciais
+let tiposServico = ["Peso", "Diagnóstico de Gestação", "Exame", "Saída", "Entrada", "Vacina", "Vermifugacao", "Transferencia", "Cobricao", "Outro", "Brinco"];
+let tipoSelecionado = tiposServico[0];
+
+function onTipoServicoSelecionado(tipo) {
+    tipoSelecionado = tipo;
+    renderTiposServico();
+    renderizarCamposMovimentacao(tipoSelecionado);
+    const hidden = document.getElementById('tipo-servico-hidden');
+    if (hidden) hidden.value = tipoSelecionado;
+}
+
+function renderTiposServico() {
+    const container = document.getElementById('tipos-servico-container');
+    if (!container) return;
+    container.querySelectorAll('.tipo-servico-card').forEach(e => e.remove());
+    tiposServico.forEach(tipo => {
+        const card = document.createElement('div');
+        card.className = 'tipo-servico-card' + (tipo === tipoSelecionado ? ' selected' : '');
+        card.textContent = tipo;
+        card.onclick = () => onTipoServicoSelecionado(tipo);
+        container.insertBefore(card, document.getElementById('btn-adicionar-tipo'));
+    });
+}
+
+function renderizarCamposMovimentacao(tipo) {
+    const container = document.getElementById('movimentacao-dinamica');
+    container.innerHTML = '';
+    const campos = camposPorTipo[tipo] || [];
+    campos.forEach(campo => {
+        const div = document.createElement('div');
+        div.className = 'form-row';
+        const label = document.createElement('label');
+        label.htmlFor = campo.id;
+        label.textContent = campo.label + (campo.required ? ' *' : '');
+        const input = document.createElement('input');
+        input.type = campo.type;
+        input.id = campo.id;
+        input.name = campo.id;
+        if (campo.step) input.step = campo.step;
+        if (campo.required) input.required = true;
+        div.appendChild(label);
+        div.appendChild(input);
+        container.appendChild(div);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    renderTiposServico();
+    renderizarCamposMovimentacao(tipoSelecionado);
+    // Botão para mostrar formulário de novo tipo
+    const btnAdd = document.getElementById('btn-adicionar-tipo');
+    if (btnAdd) {
+        btnAdd.onclick = function () {
+            document.getElementById('novo-tipo-form').style.display = 'flex';
+            document.getElementById('novo-tipo-input').focus();
+        };
+    }
+    // Botão para salvar novo tipo
+    const btnSalvar = document.getElementById('salvar-novo-tipo');
+    if (btnSalvar) {
+        btnSalvar.onclick = function () {
+            const novoTipo = document.getElementById('novo-tipo-input').value.trim();
+            if (novoTipo && !tiposServico.includes(novoTipo)) {
+                tiposServico.push(novoTipo);
+                tipoSelecionado = novoTipo;
+                renderTiposServico();
+                document.getElementById('novo-tipo-input').value = '';
+                document.getElementById('novo-tipo-form').style.display = 'none';
+                // Atualiza input oculto se existir
+                const hidden = document.getElementById('tipo-servico-hidden');
+                if (hidden) hidden.value = tipoSelecionado;
+            }
+        };
+    }
+    // Enter no input adiciona também
+    const inputNovo = document.getElementById('novo-tipo-input');
+    if (inputNovo) {
+        inputNovo.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('salvar-novo-tipo').click();
+            }
+        });
+    }
+    // Se quiser manter o valor selecionado para envio, crie um input hidden:
+    let hidden = document.getElementById('tipo-servico-hidden');
+    if (!hidden) {
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.id = 'tipo-servico-hidden';
+        hidden.name = 'tipo-servico';
+        hidden.value = tipoSelecionado;
+        document.getElementById('animal-form')?.appendChild(hidden);
+    }
+});
+
+// No final do DOMContentLoaded, adicione:
+document.getElementById('card-total-animais').addEventListener('click', () => {
+    // Foca no primeiro campo do formulário para adicionar novo
+    document.getElementById('serie').focus();
+    // Rola a página até o formulário
+    document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('card-ultimo-animal').addEventListener('click', () => {
+    if (animais.length > 0) {
+        // Edita o último animal cadastrado
+        editarAnimal(animais.length - 1);
+    } else {
+        alert('Nenhum animal cadastrado ainda.');
+    }
+});
+
+window.editarAnimal = function (index) {
+    const animal = animais[index];
+
+    // Preenche o formulário com os dados do animal
+    document.getElementById('serie').value = animal.serie;
+    document.getElementById('rg').value = animal.rg;
+    document.getElementById('sexo').value = animal.sexo;
+    document.getElementById('raca').value = animal.raca;
+    document.getElementById('custo').value = animal.custo;
+    document.getElementById('valor-venda').value = animal.venda;
+    document.getElementById('nascimento').value = animal.nascimento || '';
+    document.getElementById('meses').value = animal.meses || '';
+
+    // Preenche a movimentação se existir
+    if (animal.movimentacao && animal.movimentacao.tipo) {
+        tipoSelecionado = animal.movimentacao.tipo;
+        renderTiposServico();
+        renderizarCamposMovimentacao(tipoSelecionado);
+
+        // Preenche os campos dinâmicos
+        const campos = camposPorTipo[tipoSelecionado] || [];
+        campos.forEach(campo => {
+            const input = document.getElementById(campo.id);
+            if (input && animal.movimentacao[campo.id]) {
+                input.value = animal.movimentacao[campo.id];
+            }
+        });
+    }
+
+    // Rola até o formulário
+    document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+
+    // Atualiza o submit para editar em vez de adicionar novo
+    const form = document.getElementById('animal-form');
+    form.onsubmit = function(e) {
+        e.preventDefault();
+
+        if (!validarFormulario()) return;
+
+        // Atualiza o animal existente
+        animais[index] = {
+            serie: validadores.serie.formatar(document.getElementById("serie").value),
+            rg: validadores.rg.formatar(document.getElementById("rg").value),
+            sexo: validadores.sexo.formatar(document.getElementById("sexo").value),
+            raca: validadores.raca.formatar(document.getElementById("raca").value),
+            custo: document.getElementById("custo").value || 0,
+            venda: validadores.valorVenda.formatar(document.getElementById("valor-venda").value),
+            nascimento: document.getElementById("nascimento").value,
+            meses: document.getElementById("meses").value,
+            movimentacao: getMovimentacaoFromForm()
+        };
+
+        salvarNoStorage();
+        renderizarTabela();
+        form.reset();
+        movDinamicaEl.innerHTML = '';
+
+        // Restaura o submit original para adicionar novos
+        form.onsubmit = submitOriginal;
+    };
+
+    // Guarda a função original de submit
+    const submitOriginal = form.onsubmit;
+};
+
+function getMovimentacaoFromForm() {
+    const tipoServico = tipoSelecionado;
+    let movimentacao = { tipo: tipoServico };
+    const camposMov = camposPorTipo[tipoServico] || [];
+
+    camposMov.forEach(campo => {
+        movimentacao[campo.id] = document.getElementById(campo.id)?.value || '';
+    });
+
+    return movimentacao;
+}
+
+function validarFormulario() {
+    const campos = ['serie', 'rg', 'sexo', 'raca'];
+    let todosValidos = true;
+
+    campos.forEach(campo => {
+        const tipo = campo === 'valor-venda' ? 'valorVenda' : campo;
+        if (!aplicarValidacao(campo, tipo)) {
+            todosValidos = false;
+        }
+    });
+
+    return todosValidos;
+}
+
+// Substitua o form.addEventListener("submit", (e) => { ... }) por:
+form.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    if (!validarFormulario()) {
+        alert('Por favor, corrija os erros antes de salvar.');
+        return;
+    }
+
+    const novoAnimal = {
+        serie: validadores.serie.formatar(document.getElementById("serie").value),
+        rg: validadores.rg.formatar(document.getElementById("rg").value),
+        sexo: validadores.sexo.formatar(document.getElementById("sexo").value),
+        raca: validadores.raca.formatar(document.getElementById("raca").value),
+        custo: document.getElementById("custo").value || 0,
+        venda: validadores.valorVenda.formatar(document.getElementById("valor-venda").value),
+        nascimento: document.getElementById("nascimento").value,
+        meses: document.getElementById("meses").value,
+        movimentacao: getMovimentacaoFromForm()
+    };
+
+    animais.push(novoAnimal);
+    salvarNoStorage();
+    renderizarTabela();
+    form.reset();
+    movDinamicaEl.innerHTML = '';
+
+    // Limpar classes de validação
+    ['serie', 'rg', 'sexo', 'raca'].forEach(campo => {
+        document.getElementById(campo).classList.remove('erro', 'sucesso');
+        removerMensagemErro(document.getElementById(campo));
+    });
+
+    // Resetar seleção do tipo de serviço
+    tipoSelecionado = tiposServico[0];
+    renderTiposServico();
+    renderizarCamposMovimentacao(tipoSelecionado);
+    const hidden = document.getElementById('tipo-servico-hidden');
+    if (hidden) hidden.value = tipoSelecionado;
+});
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    // Validar todos os campos obrigatórios
+    const campos = ['serie', 'rg', 'sexo', 'raca']; // valor-venda não é obrigatório
+    let todosValidos = true;
+
+    campos.forEach(campo => {
+        const tipo = campo === 'valor-venda' ? 'valorVenda' : campo;
+        if (!aplicarValidacao(campo, tipo)) {
+            todosValidos = false;
+        }
+    });
+
+    if (!todosValidos) {
+        alert('Por favor, corrija os erros antes de salvar.');
+        return;
+    }
+
+    // Movimentação dinâmica
+    const tipoServico = tipoSelecionado; // ou document.getElementById('tipo-servico-hidden').value
+    let movimentacao = { tipo: tipoServico };
+    const camposMov = camposPorTipo[tipoServico] || [];
+    camposMov.forEach(campo => {
+        movimentacao[campo.id] = document.getElementById(campo.id)?.value || '';
+    });
+
+    // Cálculo do custo total
+    let custo = document.getElementById("custo").value || 0;
+    if (tipoServico === 'Brinco') {
+        const valorBrinco = parseFloat(document.getElementById('mov-brinco-valor')?.value) || 0;
+        custo = (parseFloat(custo) || 0) + valorBrinco;
+    }
+
+    const novoAnimal = {
+        serie: validadores.serie.formatar(document.getElementById("serie").value),
+        rg: validadores.rg.formatar(document.getElementById("rg").value),
+        sexo: validadores.sexo.formatar(document.getElementById("sexo").value),
+        raca: validadores.raca.formatar(document.getElementById("raca").value),
+        custo: custo,
+        venda: validadores.valorVenda.formatar(document.getElementById("valor-venda").value),
+        nascimento: document.getElementById("nascimento").value,
+        meses: document.getElementById("meses").value,
+        movimentacao
+    };
+
+    animais.push(novoAnimal);
+    salvarNoStorage();
+    renderizarTabela();
+    form.reset();
+    movDinamicaEl.innerHTML = '';
+    // Limpar classes de validação
+    campos.forEach(campo => {
+        document.getElementById(campo).classList.remove('erro', 'sucesso');
+        removerMensagemErro(document.getElementById(campo));
+    });
+    // Resetar seleção do tipo de serviço para o primeiro
+    tipoSelecionado = tiposServico[0];
+    renderTiposServico();
+    renderizarCamposMovimentacao(tipoSelecionado);
+    const hidden = document.getElementById('tipo-servico-hidden');
+    if (hidden) hidden.value = tipoSelecionado;
 });

@@ -492,3 +492,83 @@ tbody tr:hover {
     border-width: 2px;
     filter: brightness(1.08);
 }
+
+#tipo-servico {
+    max-width: 100px;
+    min-width: 360px;
+    width: 100%;
+}
+
+#tipos-servico-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.tipo-servico-card {
+  padding: 0.7rem 1.5rem;
+  background: #e0f2f1;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid #00796b;
+  font-weight: 500;
+  transition: background 0.2s, border 0.2s;
+}
+.tipo-servico-card.selected {
+  background: #00796b;
+  color: #fff;
+  border-color: #004d40;
+}
+#btn-adicionar-tipo {
+  padding: 0.7rem 1.2rem;
+  background: #fff;
+  color: #00796b;
+  border: 2px dashed #00796b;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s, color 0.2s;
+}
+#btn-adicionar-tipo:hover {
+  background: #e0f2f1;
+  color: #004d40;
+}
+#novo-tipo-form {
+  margin-top: 0.7rem;
+  display: flex;
+  gap: 0.5rem;
+}
+#novo-tipo-input {
+  padding: 0.5rem;
+  border: 1px solid #00796b;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+#salvar-novo-tipo {
+  padding: 0.5rem 1rem;
+  background: #00796b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#salvar-novo-tipo:hover {
+  background: #004d40;
+}
+
+.card-resumo.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.card-resumo.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 77, 64, 0.15);
+}
+
+.card-resumo.clickable:active {
+    transform: translateY(0);
+}

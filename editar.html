@@ -15,6 +15,17 @@
     <main>
         <section id="form-section">
             <form id="editar-animal-form">
+                <div class="form-row">
+                    <label for="tipo-servico-hidden">Tipo de Serviço: <span style="color:#d32f2f;">*</span></label>
+                    <div id="tipos-servico-container">
+                        <!-- Os cards de tipos de serviço serão inseridos via JS -->
+                        <button id="btn-adicionar-tipo" type="button">+ Adicionar tipo de serviço</button>
+                    </div>
+                    <div id="novo-tipo-form" style="display:none; margin-bottom: 1rem;">
+                        <input type="text" id="novo-tipo-input" placeholder="Novo tipo de serviço">
+                        <button id="salvar-novo-tipo" type="button">Salvar</button>
+                    </div>
+                </div>
                 <div class="form-row-group">
                     <div class="form-row">
                         <label for="serie">Série:</label>
@@ -62,17 +73,6 @@
                         <label for="valor-venda">Valor de Venda (R$):</label>
                         <input type="number" id="valor-venda" step="0.01" readonly>
                     </div>
-                </div>
-                <div class="form-row">
-                    <label for="tipo-servico">Tipo de Serviço:</label>
-                    <select id="tipo-servico" required>
-                        <option value="">Selecione</option>
-                        <option value="Peso">Peso</option>
-                        <option value="DG">Diagnóstico de Gestação</option>
-                        <option value="Exame">Exame</option>
-                        <option value="Saida">Saída</option>
-                        <option value="Entrada">Entrada</option>
-                    </select>
                 </div>
                 <div id="movimentacao-dinamica"></div>
                 <div class="form-actions">

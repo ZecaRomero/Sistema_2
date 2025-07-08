@@ -15,6 +15,16 @@
     </header>
 
     <main>
+
+        <!-- Na seção de resumo, modifique os cards para: -->
+<div class="card-resumo clickable" id="card-total-animais" title="Clique para adicionar novo animal">
+    <h3>Animais Cadastrados</h3>
+    <div id="total-animais">0</div>
+</div>
+<div class="card-resumo clickable" id="card-ultimo-animal" title="Clique para editar último animal">
+    <h3>Último Cadastrado</h3>
+    <div id="ultimo-animal">-</div>
+</div>
         <!-- Cards de Resumo -->
         <section id="resumo-section" style="display:flex; align-items:center; gap:1.5rem;">
             <button id="btn-anterior"
@@ -102,21 +112,15 @@
                 </div>
                 <!-- Movimentação dinâmica -->
                 <div class="form-row">
-                    <label for="tipo-servico">Tipo de Serviço:</label>
-                    <select id="tipo-servico" required>
-                        <option value="">Selecione</option>
-                        <option value="Peso">Peso</option>
-                        <option value="DG">Diagnóstico de Gestação</option>
-                        <option value="Exame">Exame</option>
-                        <option value="Saida">Saída</option>
-                        <option value="Entrada">Entrada</option>
-                        <option value="Vacina">Vacina</option>
-                        <option value="Vermifugacao">Vermifugação</option>
-                        <option value="Transferencia">Transferência</option>
-                        <option value="Cobricao">Cobrição</option>
-                        <option value="Outro">Outro</option>
-                        <option value="Brinco">Brinco</option>
-                    </select>
+                    <label for="tipo-servico-hidden">Tipo de Serviço: <span style="color:#d32f2f;">*</span></label>
+                    <div id="tipos-servico-container">
+                        <!-- Os cards de tipos de serviço serão inseridos via JS -->
+                        <button id="btn-adicionar-tipo" type="button">+ Adicionar tipo de serviço</button>
+                    </div>
+                    <div id="novo-tipo-form" style="display:none; margin-bottom: 1rem;">
+                        <input type="text" id="novo-tipo-input" placeholder="Novo tipo de serviço">
+                        <button id="salvar-novo-tipo" type="button">Salvar</button>
+                    </div>
                 </div>
                 <div id="movimentacao-dinamica"></div>
 

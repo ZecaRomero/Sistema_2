@@ -78,6 +78,69 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarCamposMovimentacao(this.value, {});
     });
 
+    // Tipos de serviço iniciais
+    let tiposServico = ["Consulta", "Vacina", "Cirurgia"];
+    let tipoSelecionado = tiposServico[0];
+
+    function renderTiposServico() {
+        const container = document.getElementById('tipos-servico-container');
+        if (!container) return;
+        // Remove todos os cards antigos, exceto o botão de adicionar
+        container.querySelectorAll('.tipo-servico-card').forEach(e => e.remove());
+        tiposServico.forEach(tipo => {
+            const card = document.createElement('div');
+            card.className = 'tipo-servico-card' + (tipo === tipoSelecionado ? ' selected' : '');
+            card.textContent = tipo;
+            card.onclick = () => {
+                tipoSelecionado = tipo;
+                renderTiposServico();
+                // Atualiza input oculto se existir
+                const hidden = document.getElementById('tipo-servico-hidden');
+                if (hidden) hidden.value = tipoSelecionado;
+            };
+            container.insertBefore(card, document.getElementById('btn-adicionar-tipo'));
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        renderTiposServico();
+        // Botão para mostrar formulário de novo tipo
+        document.getElementById('btn-adicionar-tipo').onclick = function () {
+            document.getElementById('novo-tipo-form').style.display = 'flex';
+            document.getElementById('novo-tipo-input').focus();
+        };
+        // Botão para salvar novo tipo
+        document.getElementById('salvar-novo-tipo').onclick = function () {
+            const novoTipo = document.getElementById('novo-tipo-input').value.trim();
+            if (novoTipo && !tiposServico.includes(novoTipo)) {
+                tiposServico.push(novoTipo);
+                tipoSelecionado = novoTipo;
+                renderTiposServico();
+                document.getElementById('novo-tipo-input').value = '';
+                document.getElementById('novo-tipo-form').style.display = 'none';
+                // Atualiza input oculto se existir
+                const hidden = document.getElementById('tipo-servico-hidden');
+                if (hidden) hidden.value = tipoSelecionado;
+            }
+        };
+        // Enter no input adiciona também
+        document.getElementById('novo-tipo-input').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('salvar-novo-tipo').click();
+            }
+        });
+        // Se quiser manter o valor selecionado para envio, crie um input hidden:
+        let hidden = document.getElementById('tipo-servico-hidden');
+        if (!hidden) {
+            hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.id = 'tipo-servico-hidden';
+            hidden.name = 'tipo-servico';
+            hidden.value = tipoSelecionado;
+            document.forms[0]?.appendChild(hidden);
+        }
+    });
+
     // Salvar alterações
     document.getElementById('editar-animal-form').addEventListener('submit', function (e) {
         e.preventDefault();
